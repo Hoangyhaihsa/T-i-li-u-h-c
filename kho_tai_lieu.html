@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho tài liệu ôn thi 10A1 (Realtime)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Family Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .pulse-live {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased bg-slate-50">
+
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 relative">
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span class="pulse-live absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg sm:text-xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Tài Liệu 10A1</span>
+                            <span class="hidden sm:inline-flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                <i class="fa-solid fa-wifi text-[8px]"></i> REALTIME
+                            </span>
+                        </div>
+                        <span class="text-xs text-slate-500 font-medium hidden md:block">Kho Tài Liệu & Slide Lớp 10A1</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls & User Info -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    
+                    <!-- Saved Bookmarks Button -->
+                    <button id="savedFilterBtn" onclick="toggleSavedFilter()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition text-xs sm:text-sm font-medium">
+                        <i id="savedHeaderIcon" class="fa-regular fa-bookmark text-blue-600"></i>
+                        <span class="hidden sm:inline">Đã Lưu</span>
+                        <span id="savedCountBadge" class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+                    </button>
+
+                    <!-- Admin Account Management Button -->
+                    <button id="adminMgmtBtn" onclick="openUserMgmtModal()" class="hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 transition text-xs sm:text-sm font-semibold">
+                        <i class="fa-solid fa-users-gear text-purple-600"></i>
+                        <span class="hidden md:inline">Quản Lý Lớp</span>
+                    </button>
+
+                    <!-- Add Document Button -->
+                    <button onclick="openUploadModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium text-xs sm:text-sm hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20 transition transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Đăng Tài Liệu</span>
+                    </button>
+
+                    <!-- User Account / Login State -->
+                    <div id="userAccountSection" class="border-l border-slate-200 pl-2 ml-1">
+                        <!-- Dynamic Account Button -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white pt-10 pb-14 px-4 relative overflow-hidden">
+        <div class="absolute -top-24 -left-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-semibold rounded-full mb-3">
+                <i class="fa-solid fa-bolt text-amber-400"></i> Đồng bộ thời gian thực cho lớp 10A1
+            </div>
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3">
+                Kho Tài Liệu Ôn Thi & <span class="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">PowerPoint 10A1</span>
+            </h1>
+            <p class="text-slate-300 text-xs sm:text-base mb-6 max-w-2xl mx-auto leading-relaxed">
+                Đăng bài, tải đề thi, chia sẻ slide thuyết trình với cả lớp. Mọi cập nhật sẽ tự động hiển thị ngay tức thì!
+            </p>
+
+            <!-- Search Input Box -->
+            <div class="relative max-w-2xl mx-auto shadow-2xl rounded-2xl">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 text-base sm:text-lg"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Tìm tên môn học, tiêu đề bài viết, người đăng..." 
+                           class="w-full pl-11 pr-24 py-3.5 bg-white/95 backdrop-blur text-slate-800 placeholder-slate-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/30 text-xs sm:text-sm border border-slate-200 font-medium">
+                    <button onclick="handleSearch()" class="absolute right-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-xs sm:text-sm transition">
+                        Tìm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Category & Subject Filtering Bar -->
+        <div class="flex flex-col gap-5 mb-8">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200" id="categoryTabs">
+                <!-- Subject Tabs -->
+            </div>
+
+            <!-- Secondary Filters Bar -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-1.5 flex-wrap" id="formatFilterContainer">
+                    <!-- Format Pills -->
+                </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                    <span class="text-xs font-medium text-slate-500">Sắp xếp:</span>
+                    <select id="sortBySelect" onchange="applyFilters()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                        <option value="newest">Mới nhất</option>
+                        <option value="popular">Lượt tải nhiều</option>
+                        <option value="rating">Đánh giá cao</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Count Summary Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-2">
+                <p class="text-slate-600 text-xs sm:text-sm font-medium" id="resultsCountText">Đang đồng bộ dữ liệu Realtime...</p>
+                <span id="syncIndicator" class="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-ping" title="Kết nối Realtime hoạt động"></span>
+            </div>
+            <button id="resetFiltersBtn" onclick="resetFilters()" class="hidden text-xs text-blue-600 hover:underline font-semibold">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Xóa bộ lọc
+            </button>
+        </div>
+
+        <!-- Document Grid Items -->
+        <div id="resourceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamically Rendered Cards -->
+        </div>
+
+        <!-- Empty Results Placeholder -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300">
+            <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-700 mb-1">Chưa tìm thấy tài liệu phù hợp</h3>
+            <p class="text-xs text-slate-500 max-w-xs mx-auto mb-5">Thử đổi từ khóa tìm kiếm hoặc bấm Đăng Tài Liệu mới cho lớp nhé!</p>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-medium hover:bg-slate-900 transition">
+                Xem tất cả tài liệu
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Modal 1: Login / Register Dialog Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100 relative">
+            <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-2 rounded-xl transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Đăng Nhập Thành Viên</h3>
+                <p class="text-xs text-slate-500 mt-1">Đăng nhập tài khoản được cấp hoặc đăng ký mới</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tên đăng nhập</label>
+                    <input type="text" id="loginUsername" required placeholder="Nhập username" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mật khẩu</label>
+                    <input type="password" id="loginPassword" required placeholder="Nhập mật khẩu" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                </div>
+
+                <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800 space-y-1">
+                    <div class="font-bold mb-0.5"><i class="fa-solid fa-circle-info mr-1"></i> Tài khoản có sẵn:</div>
+                    <div>• <strong>Admin Lớp:</strong> <code>admin</code> / Mật khẩu: <code>123456</code></div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-blue-500/20 transition">
+                    Đăng Nhập
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Admin Account Management Modal -->
+    <div id="userMgmtModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Quản Lý Tài Khoản Lớp 10A1</h3>
+                        <p class="text-xs text-slate-500">Cấp tài khoản cho học sinh (Cập nhật Realtime)</p>
+                    </div>
+                </div>
+                <button onclick="closeUserMgmtModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-6 flex-grow">
+                <form id="createUserForm" onsubmit="handleCreateUserSubmit(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus text-purple-600"></i> Cấp Tài Khoản Mới
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="newUsername" required placeholder="Tên đăng nhập (username)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="password" id="newPassword" required placeholder="Mật khẩu" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" id="newFullName" required placeholder="Họ và tên (VD: Trần Văn B)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <select id="newRole" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium">
+                            <option value="student">Học Sinh</option>
+                            <option value="admin">Admin / Lớp Trưởng</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl transition">
+                        + Tạo & Đưa Lên Cloud
+                    </button>
+                </form>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Danh sách tài khoản trong hệ thống:</h4>
+                    <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-[11px] uppercase font-bold text-slate-500 border-b border-slate-200">
+                                    <th class="p-3">Họ và tên</th>
+                                    <th class="p-3">Username</th>
+                                    <th class="p-3">Mật khẩu</th>
+                                    <th class="p-3">Vai trò</th>
+                                    <th class="p-3 text-right">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-100 text-xs font-medium">
+                                <!-- Users list populated in realtime -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 text-right">
+                <button onclick="closeUserMgmtModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-300 transition">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Document Upload Form Modal -->
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Đăng Tài Liệu Realtime</h3>
+                        <p class="text-xs text-slate-500">Bài viết sẽ tự động xuất hiện trên thiết bị của các bạn</p>
+                    </div>
+                </div>
+                <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="uploadForm" onsubmit="handleUploadSubmit(event)" class="p-5 overflow-y-auto space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tên bài học / Tiêu đề tài liệu <span class="text-red-500">*</span></label>
+                    <input type="text" id="uploadTitle" required placeholder="VD: Đề thi thử Giữa kỳ 1 Môn Toán" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Môn học <span class="text-red-500">*</span></label>
+                        <select id="uploadSubject" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                            <option value="Toán Học">Toán Học</option>
+                            <option value="Ngữ Văn">Ngữ Văn</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Vật Lý">Vật Lý</option>
+                            <option value="Hóa Học">Hóa Học</option>
+                            <option value="Sinh Học">Sinh Học</option>
+                            <option value="Lịch Sử">Lịch Sử</option>
+                            <option value="Địa Lý">Địa Lý</option>
+                            <option value="Mẫu PPT Thuyết Trình">Mẫu PPT Thuyết Trình</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Định dạng file <span class="text-red-500">*</span></label>
+                        <select id="uploadFormat" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                            <option value="PDF">Tài liệu PDF (.PDF)</option>
+                            <option value="PPTX">Mẫu Slide (.PPTX)</option>
+                            <option value="DOCX">Văn bản Word (.DOCX)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Ghi chú / Link chia sẻ file (Google Drive / OneDrive...)</label>
+                    <textarea id="uploadDesc" rows="3" placeholder="Nhập mô tả tóm tắt hoặc dán đường link tải tệp đính kèm tại đây..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-medium text-xs sm:text-sm">Hủy</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/20">Đăng Lên Cloud ngay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Document Detail & Comments Modal -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="p-5 border-b border-slate-100 flex items-start justify-between bg-slate-50">
+                <div class="flex items-start gap-3">
+                    <div id="modalFormatBadge" class="p-3 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm"></div>
+                    <div>
+                        <span id="modalSubject" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 inline-block mb-1">Subject</span>
+                        <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800 leading-snug">Title</h3>
+                    </div>
+                </div>
+                <button onclick="closePreviewModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-5 flex-grow">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-medium">Người đăng</div>
+                        <div id="modalAuthor" class="text-xs font-bold text-slate-700 mt-0.5 truncate">---</div>
+                    </div>
+                    <div class="border-l border-slate-200 sm:border-x">
+                        <div class="text-[10px] text-slate-400 font-medium">Ngày đăng</div>
+                        <div id="modalDate" class="text-xs font-bold text-slate-700 mt-0.5">---</div>
+                    </div>
+                    <div class="border-t sm:border-t-0 sm:border-r border-slate-200 pt-1 sm:pt-0">
+                        <div class="text-[10px] text-slate-400 font-medium">Lượt tải</div>
+                        <div id="modalDownloads" class="text-xs font-bold text-slate-700 mt-0.5">---</div>
+                    </div>
+                    <div class="border-t sm:border-t-0 border-slate-200 pt-1 sm:pt-0">
+                        <div class="text-[10px] text-slate-400 font-medium">Định dạng</div>
+                        <div id="modalFormatText" class="text-xs font-bold text-slate-700 mt-0.5">---</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mô tả / Ghi chú:</h4>
+                    <p id="modalDescription" class="text-slate-600 text-xs sm:text-sm leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-slate-100 break-words">---</p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
+                <button id="modalDeleteBtn" class="hidden px-3 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 font-semibold text-xs items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> Xóa tài liệu
+                </button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button id="modalSaveBtn" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium text-xs flex items-center gap-1.5">
+                        <i class="fa-regular fa-bookmark"></i> <span>Lưu</span>
+                    </button>
+                    <button onclick="simulatedDownload()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Tải Về
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs sm:text-sm font-medium pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMessage">Thông báo!</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kho-tai-lieu-10a1';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "demo-api-key",
+                authDomain: "demo-app.firebaseapp.com",
+                projectId: "demo-app",
+                storageBucket: "demo-app.appspot.com",
+                messagingSenderId: "123456789",
+                appId: "1:123456789:web:abcdef"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Firestore Paths (Strict Rule 1)
+        const RESOURCES_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'resources');
+        const USERS_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+
+        // Application State
+        window.state = {
+            users: [],
+            resources: [],
+            currentUser: JSON.parse(localStorage.getItem('10a1_currentUser')) || null,
+            selectedSubject: "Tất cả",
+            selectedFormat: "Tất cả",
+            searchQuery: "",
+            sortBy: "newest",
+            onlySaved: false,
+            savedIds: new Set(JSON.parse(localStorage.getItem('10a1_saved') || '[]')),
+            selectedResourceForModal: null
+        };
+
+        const subjectsList = ["Tất cả", "Toán Học", "Ngữ Văn", "Tiếng Anh", "Vật Lý", "Hóa Học", "Sinh Học", "Lịch Sử", "Địa Lý", "Mẫu PPT Thuyết Trình"];
+        const formatsList = ["Tất cả", "PDF", "PPTX", "DOCX"];
+
+        // Initialize Realtime App Connection
+        async function initRealtimeApp() {
+            try {
+                // Rule 3: Auth first before any Firestore listeners
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 1. Listen Realtime Resources
+                onSnapshot(RESOURCES_COLLECTION, (snapshot) => {
+                    const list = [];
+                    snapshot.forEach((docSnap) => {
+                        list.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    
+                    // Seed initial data if database is empty
+                    if (list.length === 0 && snapshot.metadata.fromCache === false) {
+                        seedInitialResources();
+                    } else {
+                        window.state.resources = list;
+                        window.applyFilters();
+                    }
+                }, (error) => {
+                    console.error("Resources sync error:", error);
+                });
+
+                // 2. Listen Realtime Users
+                onSnapshot(USERS_COLLECTION, (snapshot) => {
+                    const usersList = [];
+                    snapshot.forEach((docSnap) => {
+                        usersList.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+
+                    if (usersList.length === 0 && snapshot.metadata.fromCache === false) {
+                        seedInitialUsers();
+                    } else {
+                        window.state.users = usersList;
+                        if (document.getElementById("userMgmtModal") && !document.getElementById("userMgmtModal").classList.contains("hidden")) {
+                            window.renderUsersTable();
+                        }
+                    }
+                }, (error) => {
+                    console.error("Users sync error:", error);
+                });
+
+            } catch (err) {
+                console.error("Firebase init failed:", err);
+            }
+        }
+
+        // Seed Data Functions
+        async function seedInitialResources() {
+            const defaults = [
+                {
+                    title: "Đề Thi Ôn Tập Giữa Kỳ 1 Môn Toán 10 (Có Đáp Án Chi Tiết)",
+                    subject: "Toán Học",
+                    format: "PDF",
+                    rating: 4.9,
+                    downloads: 52,
+                    author: "Lớp Trưởng (Admin)",
+                    createdDate: "05/10/2026",
+                    timestamp: Date.now(),
+                    description: "Bộ đề trắc nghiệm và tự luận bám sát chương trình Toán 10.",
+                    bgGradient: "from-blue-600 to-indigo-600"
+                },
+                {
+                    title: "Mẫu Slide PowerPoint Thuyết Trình Môn Ngữ Văn",
+                    subject: "Mẫu PPT Thuyết Trình",
+                    format: "PPTX",
+                    rating: 5.0,
+                    downloads: 38,
+                    author: "Nguyễn Văn A",
+                    createdDate: "04/10/2026",
+                    timestamp: Date.now() - 10000,
+                    description: "Mẫu slide thiết kế tone xanh lá hoài cổ cực đẹp cho môn Ngữ Văn.",
+                    bgGradient: "from-amber-500 to-orange-600"
+                }
+            ];
+
+            for (const item of defaults) {
+                const newDocRef = doc(RESOURCES_COLLECTION);
+                await setDoc(newDocRef, item);
+            }
+        }
+
+        async function seedInitialUsers() {
+            const defaultUsers = [
+                { username: "admin", password: "123", fullName: "Lớp Trưởng (Admin)", role: "admin" },
+                { username: "hs10a1", password: "123", fullName: "Nguyễn Văn A", role: "student" }
+            ];
+
+            for (const u of defaultUsers) {
+                const userDocRef = doc(USERS_COLLECTION, u.username);
+                await setDoc(userDocRef, u);
+            }
+        }
+
+        // Expose Functions to Global Scope for HTML Event Handlers
+        window.renderSubjectTabs = function() {
+            const container = document.getElementById("categoryTabs");
+            container.innerHTML = subjectsList.map(sub => `
+                <button onclick="selectSubject('${sub}')" 
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition duration-200 ${
+                            window.state.selectedSubject === sub 
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                        }">
+                    ${sub}
+                </button>
+            `).join('');
+        };
+
+        window.renderFormatFilters = function() {
+            const container = document.getElementById("formatFilterContainer");
+            const html = formatsList.map(fmt => `
+                <button onclick="selectFormat('${fmt}')" 
+                        class="px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                            window.state.selectedFormat === fmt 
+                            ? 'bg-slate-800 text-white' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }">
+                    ${fmt}
+                </button>
+            `).join('');
+            container.innerHTML = `<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Định dạng:</span>` + html;
+        };
+
+        window.selectSubject = function(sub) {
+            window.state.selectedSubject = sub;
+            window.renderSubjectTabs();
+            window.applyFilters();
+        };
+
+        window.selectFormat = function(fmt) {
+            window.state.selectedFormat = fmt;
+            window.renderFormatFilters();
+            window.applyFilters();
+        };
+
+        window.handleSearch = function() {
+            window.state.searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
+            window.applyFilters();
+        };
+
+        window.toggleSavedFilter = function() {
+            window.state.onlySaved = !window.state.onlySaved;
+            const btn = document.getElementById("savedFilterBtn");
+            const icon = document.getElementById("savedHeaderIcon");
+            
+            if (window.state.onlySaved) {
+                btn.classList.add("bg-blue-50", "border-blue-300", "text-blue-700");
+                icon.className = "fa-solid fa-bookmark text-blue-600";
+            } else {
+                btn.classList.remove("bg-blue-50", "border-blue-300", "text-blue-700");
+                icon.className = "fa-regular fa-bookmark text-blue-600";
+            }
+            window.applyFilters();
+        };
+
+        window.resetFilters = function() {
+            window.state.selectedSubject = "Tất cả";
+            window.state.selectedFormat = "Tất cả";
+            window.state.searchQuery = "";
+            window.state.onlySaved = false;
+            document.getElementById("searchInput").value = "";
+            
+            const btn = document.getElementById("savedFilterBtn");
+            btn.classList.remove("bg-blue-50", "border-blue-300", "text-blue-700");
+            document.getElementById("savedHeaderIcon").className = "fa-regular fa-bookmark text-blue-600";
+
+            window.renderSubjectTabs();
+            window.renderFormatFilters();
+            window.applyFilters();
+        };
+
+        window.applyFilters = function() {
+            let filtered = window.state.resources.filter(item => {
+                if (window.state.selectedSubject !== "Tất cả" && item.subject !== window.state.selectedSubject) return false;
+                if (window.state.selectedFormat !== "Tất cả" && item.format !== window.state.selectedFormat) return false;
+                if (window.state.searchQuery) {
+                    const matchTitle = (item.title || "").toLowerCase().includes(window.state.searchQuery);
+                    const matchDesc = (item.description || "").toLowerCase().includes(window.state.searchQuery);
+                    const matchAuthor = (item.author || "").toLowerCase().includes(window.state.searchQuery);
+                    if (!matchTitle && !matchDesc && !matchAuthor) return false;
+                }
+                if (window.state.onlySaved && !window.state.savedIds.has(item.id)) return false;
+                return true;
+            });
+
+            const sortBy = document.getElementById("sortBySelect").value;
+            filtered.sort((a, b) => {
+                if (sortBy === 'newest') return (b.timestamp || 0) - (a.timestamp || 0);
+                if (sortBy === 'popular') return (b.downloads || 0) - (a.downloads || 0);
+                if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+                return 0;
+            });
+
+            window.renderGrid(filtered);
+
+            const countText = document.getElementById("resultsCountText");
+            const resetBtn = document.getElementById("resetFiltersBtn");
+            const isFiltered = window.state.selectedSubject !== "Tất cả" || window.state.selectedFormat !== "Tất cả" || window.state.searchQuery !== "" || window.state.onlySaved;
+            
+            resetBtn.classList.toggle("hidden", !isFiltered);
+            countText.textContent = `Hiển thị ${filtered.length} tài liệu ôn thi (Realtime Sync)`;
+        };
+
+        window.renderGrid = function(items) {
+            const grid = document.getElementById("resourceGrid");
+            const empty = document.getElementById("emptyState");
+
+            if (items.length === 0) {
+                grid.innerHTML = "";
+                empty.classList.remove("hidden");
+                return;
+            }
+
+            empty.classList.add("hidden");
+            grid.innerHTML = items.map(item => {
+                const isSaved = window.state.savedIds.has(item.id);
+                return `
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group hover:-translate-y-1">
+                    <div class="h-24 bg-gradient-to-r ${item.bgGradient || 'from-blue-600 to-indigo-600'} p-4 flex justify-between items-start relative overflow-hidden">
+                        <span class="bg-white/20 backdrop-blur-md text-white border border-white/20 text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
+                            ${item.subject}
+                        </span>
+                        <button onclick="toggleSaveItem(event, '${item.id}')" class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 flex items-center justify-center transition shadow">
+                            <i class="${isSaved ? 'fa-solid text-blue-600' : 'fa-regular'} fa-bookmark text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="bg-blue-100 text-blue-700 font-extrabold text-[10px] px-2 py-0.5 rounded">${item.format}</span>
+                                <span class="text-[11px] text-slate-400 font-medium"><i class="fa-regular fa-calendar-check mr-1"></i>${item.createdDate}</span>
+                            </div>
+
+                            <h3 onclick="openPreviewModal('${item.id}')" class="font-bold text-slate-800 text-sm sm:text-base leading-snug mb-2 hover:text-blue-600 transition cursor-pointer line-clamp-2">
+                                ${item.title}
+                            </h3>
+
+                            <p class="text-xs text-slate-500 line-clamp-2 mb-3 leading-relaxed">
+                                ${item.description || 'Chưa có mô tả thêm.'}
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between mt-2 text-xs">
+                            <div class="text-slate-500 font-medium truncate max-w-[150px]">
+                                <i class="fa-regular fa-user text-slate-400 mr-1"></i>
+                                <span>${item.author}</span>
+                            </div>
+                            <button onclick="openPreviewModal('${item.id}')" class="font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                <span>Xem thêm</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        };
+
+        window.toggleSaveItem = function(event, id) {
+            event.stopPropagation();
+            if (window.state.savedIds.has(id)) {
+                window.state.savedIds.delete(id);
+                window.showToast("Đã xóa khỏi danh sách lưu", "info");
+            } else {
+                window.state.savedIds.add(id);
+                window.showToast("Đã lưu vào bộ sưu tập", "success");
+            }
+            localStorage.setItem('10a1_saved', JSON.stringify([...window.state.savedIds]));
+            document.getElementById("savedCountBadge").textContent = window.state.savedIds.size;
+            window.applyFilters();
+        };
+
+        window.updateUserHeader = function() {
+            const container = document.getElementById("userAccountSection");
+            const adminMgmtBtn = document.getElementById("adminMgmtBtn");
+
+            if (window.state.currentUser) {
+                if (window.state.currentUser.role === 'admin') {
+                    adminMgmtBtn.classList.remove("hidden");
+                } else {
+                    adminMgmtBtn.classList.add("hidden");
+                }
+
+                container.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-xs font-bold text-slate-800 leading-tight">${window.state.currentUser.fullName}</div>
+                            <div class="text-[10px] font-medium text-slate-500">${window.state.currentUser.role === 'admin' ? 'Admin / Lớp Trưởng' : 'Học Sinh'}</div>
+                        </div>
+                        <button onclick="handleLogout()" title="Đăng xuất" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 flex items-center justify-center transition text-xs font-bold">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                adminMgmtBtn.classList.add("hidden");
+                container.innerHTML = `
+                    <button onclick="openLoginModal()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Đăng Nhập</span>
+                    </button>
+                `;
+            }
+        };
+
+        window.openLoginModal = function() { document.getElementById("loginModal").classList.remove("hidden"); };
+        window.closeLoginModal = function() { document.getElementById("loginModal").classList.add("hidden"); };
+
+        window.handleLoginSubmit = function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById("loginUsername").value.trim();
+            const passwordInput = document.getElementById("loginPassword").value.trim();
+
+            const foundUser = window.state.users.find(u => u.username === usernameInput && u.password === passwordInput);
+
+            if (foundUser) {
+                window.state.currentUser = foundUser;
+                localStorage.setItem('10a1_currentUser', JSON.stringify(foundUser));
+                window.updateUserHeader();
+                window.closeLoginModal();
+                window.showToast(`Xin chào ${foundUser.fullName}!`, "success");
+            } else {
+                window.showToast("Sai tên đăng nhập hoặc mật khẩu!", "info");
+            }
+        };
+
+        window.handleLogout = function() {
+            window.state.currentUser = null;
+            localStorage.removeItem('10a1_currentUser');
+            window.updateUserHeader();
+            window.showToast("Đã đăng xuất", "info");
+        };
+
+        window.openUserMgmtModal = function() {
+            window.renderUsersTable();
+            document.getElementById("userMgmtModal").classList.remove("hidden");
+        };
+        window.closeUserMgmtModal = function() { document.getElementById("userMgmtModal").classList.add("hidden"); };
+
+        window.renderUsersTable = function() {
+            const tbody = document.getElementById("usersTableBody");
+            tbody.innerHTML = window.state.users.map(u => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="p-3 text-slate-600"><code>${u.username}</code></td>
+                    <td class="p-3 text-slate-600"><code>${u.password}</code></td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}">
+                            ${u.role === 'admin' ? 'Admin' : 'Học Sinh'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right">
+                        ${u.username === 'admin' ? '' : `
+                            <button onclick="deleteUser('${u.id}')" class="text-rose-500 hover:text-rose-700 p-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        window.handleCreateUserSubmit = async function(e) {
+            e.preventDefault();
+            const username = document.getElementById("newUsername").value.trim();
+            const password = document.getElementById("newPassword").value.trim();
+            const fullName = document.getElementById("newFullName").value.trim();
+            const role = document.getElementById("newRole").value;
+
+            if (window.state.users.some(u => u.username === username)) {
+                window.showToast("Username này đã tồn tại!", "info");
+                return;
+            }
+
+            const newUserDoc = doc(USERS_COLLECTION, username);
+            await setDoc(newUserDoc, { username, password, fullName, role });
+            document.getElementById("createUserForm").reset();
+            window.showToast("Đã cấp tài khoản trên Cloud Realtime!", "success");
+        };
+
+        window.deleteUser = async function(docId) {
+            await deleteDoc(doc(USERS_COLLECTION, docId));
+            window.showToast("Đã xóa tài khoản khỏi Cloud!", "info");
+        };
+
+        window.openUploadModal = function() {
+            if (!window.state.currentUser) {
+                window.showToast("Bạn cần đăng nhập để đăng bài!", "info");
+                window.openLoginModal();
+                return;
+            }
+            document.getElementById("uploadModal").classList.remove("hidden");
+        };
+        window.closeUploadModal = function() { document.getElementById("uploadModal").classList.add("hidden"); };
+
+        window.handleUploadSubmit = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById("uploadTitle").value.trim();
+            const subject = document.getElementById("uploadSubject").value;
+            const format = document.getElementById("uploadFormat").value;
+            const description = document.getElementById("uploadDesc").value.trim();
+
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+
+            const newDocRef = doc(RESOURCES_COLLECTION);
+            await setDoc(newDocRef, {
+                title,
+                subject,
+                format,
+                rating: 5.0,
+                downloads: 1,
+                author: window.state.currentUser.fullName,
+                createdDate: `${day}/${month}/${year}`,
+                timestamp: Date.now(),
+                description,
+                bgGradient: "from-blue-600 to-indigo-600"
+            });
+
+            window.closeUploadModal();
+            window.showToast("Đăng tài liệu thành công lên Realtime Cloud!", "success");
+        };
+
+        window.openPreviewModal = function(id) {
+            const item = window.state.resources.find(r => r.id === id);
+            if (!item) return;
+
+            window.state.selectedResourceForModal = item;
+            document.getElementById("modalTitle").textContent = item.title;
+            document.getElementById("modalSubject").textContent = item.subject;
+            document.getElementById("modalAuthor").textContent = item.author;
+            document.getElementById("modalDate").textContent = item.createdDate;
+            document.getElementById("modalDownloads").textContent = item.downloads || 1;
+            document.getElementById("modalFormatText").textContent = item.format;
+            document.getElementById("modalDescription").textContent = item.description || "Không có ghi chú thêm.";
+
+            const badge = document.getElementById("modalFormatBadge");
+            badge.className = "p-3 rounded-2xl flex items-center justify-center text-xl font-bold bg-blue-100 text-blue-600";
+            badge.innerHTML = `<i class="fa-regular fa-file"></i>`;
+
+            const delBtn = document.getElementById("modalDeleteBtn");
+            if (window.state.currentUser && (window.state.currentUser.role === 'admin' || window.state.currentUser.fullName === item.author)) {
+                delBtn.classList.remove("hidden");
+                delBtn.classList.add("flex");
+                delBtn.onclick = async () => {
+                    await deleteDoc(doc(RESOURCES_COLLECTION, item.id));
+                    window.closePreviewModal();
+                    window.showToast("Đã xóa tài liệu!", "info");
+                };
+            } else {
+                delBtn.classList.add("hidden");
+            }
+
+            document.getElementById("previewModal").classList.remove("hidden");
+        };
+
+        window.closePreviewModal = function() { document.getElementById("previewModal").classList.add("hidden"); };
+        window.simulatedDownload = function() { window.showToast("Đang chuẩn bị tải về...", "success"); };
+
+        window.showToast = function(message, type = "success") {
+            const toast = document.getElementById("toast");
+            document.getElementById("toastMessage").textContent = message;
+            toast.classList.remove("translate-y-20", "opacity-0");
+            setTimeout(() => { toast.classList.add("translate-y-20", "opacity-0"); }, 3000);
+        };
+
+        // App Boot
+        window.addEventListener("DOMContentLoaded", () => {
+            window.updateUserHeader();
+            window.renderSubjectTabs();
+            window.renderFormatFilters();
+            document.getElementById("savedCountBadge").textContent = window.state.savedIds.size;
+            initRealtimeApp();
+        });
+    </script>
+</body>
+</html>
