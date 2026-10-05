@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Tài Liệu Ôn Thi 10A1</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Family Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased bg-slate-50 relative selection:bg-blue-200 selection:text-blue-900 overflow-x-hidden">
+
+    <!-- Background Decoration -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 blur-[100px]"></div>
+        <div class="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-purple-400/20 blur-[120px]"></div>
+    </div>
+
+    <!-- ================= VIEW ĐĂNG NHẬP ================= -->
+    <div id="loginView" class="relative z-10 min-h-screen flex items-center justify-center p-4 transition-opacity duration-500">
+        <div class="glass-panel p-8 sm:p-10 rounded-3xl shadow-2xl shadow-blue-900/10 w-full max-w-md relative overflow-hidden">
+            <!-- Deco -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-500 opacity-20 rounded-bl-full pointer-events-none"></div>
+            
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Tài Liệu 10A1</h1>
+                <p class="text-sm text-slate-500 mt-2 font-medium">Hệ thống lưu trữ học tập nội bộ</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="relative z-10 space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tên đăng nhập</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <input type="text" id="loginUsername" required placeholder="Nhập tài khoản của bạn" 
+                               class="w-full pl-10 pr-4 py-3 bg-white/80 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mật khẩu</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" 
+                               class="w-full pl-10 pr-4 py-3 bg-white/80 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-500/25 transition-transform transform hover:-translate-y-0.5">
+                    Đăng Nhập
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= VIEW CHÍNH ================= -->
+    <div id="mainView" class="hidden relative z-10 min-h-screen flex flex-col">
+        
+        <!-- Header -->
+        <header class="glass-panel sticky top-0 z-40 border-b border-slate-200/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 sm:h-20">
+                    <!-- Brand -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <span class="text-lg sm:text-xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hidden sm:block">
+                            Kho Tài Liệu 10A1
+                        </span>
+                    </div>
+
+                    <!-- User Actions -->
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <div class="hidden sm:block text-right mr-2">
+                            <div id="headerUserName" class="text-sm font-bold text-slate-800 leading-tight">Name</div>
+                            <div id="headerUserRole" class="text-[10px] font-semibold text-slate-500 uppercase">Role</div>
+                        </div>
+                        
+                        <button id="btnManageUsers" onclick="openModal('manageModal')" class="hidden items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition text-xs sm:text-sm font-bold">
+                            <i class="fa-solid fa-users-gear"></i> <span class="hidden md:inline">Quản lý lớp</span>
+                        </button>
+                        
+                        <button onclick="handleLogout()" class="w-10 h-10 sm:w-auto sm:px-4 sm:py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 flex items-center justify-center gap-2 transition text-sm font-bold shadow-sm">
+                            <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Thoát</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="py-10 sm:py-16 px-4 text-center">
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-slate-800 tracking-tight mb-4">
+                Chia sẻ tri thức <br class="sm:hidden"/> <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Cùng tiến bước</span>
+            </h2>
+            <p class="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto font-medium">Nơi lưu trữ đề cương, bài tập và bài thuyết trình của tập thể lớp 10A1.</p>
+        </section>
+
+        <!-- Main Content -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            <!-- Toolbar -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-500"></i> Tài liệu mới cập nhật
+                </h3>
+                <button onclick="openModal('uploadModal')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 transition-transform">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Đăng tài liệu
+                </button>
+            </div>
+
+            <!-- Documents Grid -->
+            <div id="resourceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- JS Renders Cards Here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300">
+                <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700 mb-1">Kho tài liệu đang trống</h3>
+                <p class="text-sm text-slate-500">Hãy là người đầu tiên đóng góp tài liệu cho lớp nhé!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODAL ĐĂNG TÀI LIỆU ================= -->
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('uploadModal')"></div>
+        <!-- Modal Content -->
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto transform scale-95 transition-transform duration-300 overflow-hidden" id="uploadModalContent">
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-plus"></i></span>
+                        Thêm tài liệu mới
+                    </h3>
+                    <button type="button" onclick="closeModal('uploadModal')" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <form onsubmit="handleAddDoc(event)" class="p-6 space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tên tài liệu / Tiêu đề <span class="text-rose-500">*</span></label>
+                        <input type="text" id="docTitle" required placeholder="VD: Đề cương Toán giữa kì 1" 
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Đường link (Drive, Mega...) <span class="text-rose-500">*</span></label>
+                        <input type="url" id="docLink" required placeholder="https://..." 
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-shadow">
+                    </div>
+                    <div class="pt-2 flex justify-end gap-3">
+                        <button type="button" onclick="closeModal('uploadModal')" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition">Hủy</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/25 transition-transform transform hover:-translate-y-0.5">Đăng lên</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL QUẢN LÝ TÀI KHOẢN ================= -->
+    <div id="manageModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('manageModal')"></div>
+        <!-- Modal Content -->
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] pointer-events-auto transform scale-95 transition-transform duration-300 flex flex-col overflow-hidden" id="manageModalContent">
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-users-gear"></i></span>
+                        Quản lý lớp học
+                    </h3>
+                    <button type="button" onclick="closeModal('manageModal')" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto flex-grow space-y-8">
+                    <!-- Form thêm user -->
+                    <div class="bg-purple-50/50 border border-purple-100 p-5 rounded-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-bl-full pointer-events-none"></div>
+                        <h4 class="text-sm font-bold text-purple-800 mb-4 uppercase tracking-wider"><i class="fa-solid fa-user-plus mr-1"></i> Cấp tài khoản mới</h4>
+                        <form onsubmit="handleAddUser(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            <input type="text" id="newFullname" required placeholder="Họ và tên thật" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium shadow-sm">
+                            <input type="text" id="newUsername" required placeholder="Tên đăng nhập" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium shadow-sm">
+                            <input type="text" id="newPassword" required placeholder="Mật khẩu" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium shadow-sm">
+                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-purple-500/25 transition-transform transform hover:-translate-y-0.5">Thêm ngay</button>
+                        </form>
+                    </div>
+
+                    <!-- Bảng User -->
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Danh sách thành viên</h4>
+                        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Họ và Tên</th>
+                                        <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tài khoản</th>
+                                        <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Mật khẩu</th>
+                                        <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userListTable" class="divide-y divide-slate-100 text-sm">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CUSTOM TOAST NOTIFICATION ================= -->
+    <div id="toast" class="fixed bottom-5 right-5 z-[60] transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 px-5 py-3.5 bg-slate-800 text-white rounded-2xl shadow-2xl pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-check-circle text-emerald-400 text-xl"></i>
+        <span id="toastMsg" class="font-medium text-sm">Thành công!</span>
+    </div>
+
+    <!-- ================= CUSTOM CONFIRM MODAL ================= -->
+    <div id="confirmModal" class="fixed inset-0 z-[70] hidden opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeConfirm()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm pointer-events-auto transform scale-95 transition-transform duration-200 text-center p-6" id="confirmModalContent">
+                <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Xác nhận</h3>
+                <p class="text-sm text-slate-500 mb-6 font-medium" id="confirmDesc">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeConfirm()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Hủy</button>
+                    <button id="btnConfirmAction" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-500/25 transition">Đồng ý</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // Constants & State
+        const USERS_KEY = 'tailieu10a1_users_v3'; 
+        const DOCS_KEY = 'tailieu10a1_docs_v3';
+        let currentUser = null;
+        let confirmActionCallback = null;
+
+        // Custom UI Functions (No alert/confirm)
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMsg').textContent = message;
+            
+            if(type === 'success') {
+                icon.className = 'fa-solid fa-check-circle text-emerald-400 text-xl';
+                toast.className = 'fixed bottom-5 right-5 z-[60] transform transition-all duration-300 flex items-center gap-3 px-5 py-3.5 bg-slate-800 text-white rounded-2xl shadow-2xl pointer-events-none';
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-xmark text-rose-400 text-xl';
+                toast.className = 'fixed bottom-5 right-5 z-[60] transform transition-all duration-300 flex items-center gap-3 px-5 py-3.5 bg-rose-600 text-white rounded-2xl shadow-2xl pointer-events-none';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function askConfirm(title, desc, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmDesc').textContent = desc;
+            confirmActionCallback = onConfirm;
+            
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            modal.classList.remove('hidden');
+            // Small delay for transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirm() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        document.getElementById('btnConfirmAction').addEventListener('click', () => {
+            if(confirmActionCallback) confirmActionCallback();
+            closeConfirm();
+        });
+
+        // Modal Helpers
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            const content = document.getElementById(id + 'Content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            const content = document.getElementById(id + 'Content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // Initialization
+        function initApp() {
+            let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            // Create hidden admin silently
+            if (!users.find(u => u.username === 'admin')) {
+                users.push({ username: 'admin', password: '123456', fullName: 'Ban Cán Sự (Admin)', role: 'admin' });
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            }
+
+            // Check Session
+            const sessionUser = sessionStorage.getItem('tailieu10a1_session');
+            if(sessionUser) {
+                currentUser = JSON.parse(sessionUser);
+                setupMainView();
+            }
+        }
+
+        // Auth Logic
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+            
+            const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            const validUser = users.find(user => user.username === u && user.password === p);
+
+            if (validUser) {
+                currentUser = validUser;
+                sessionStorage.setItem('tailieu10a1_session', JSON.stringify(validUser));
+                setupMainView();
+                document.getElementById('loginForm').reset();
+                showToast(`Xin chào ${currentUser.fullName}!`);
+            } else {
+                showToast('Sai tên đăng nhập hoặc mật khẩu!', 'error');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            sessionStorage.removeItem('tailieu10a1_session');
+            document.getElementById('mainView').classList.add('hidden');
+            document.getElementById('loginView').classList.remove('hidden');
+            showToast('Đã đăng xuất an toàn');
+        }
+
+        function setupMainView() {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('mainView').classList.remove('hidden');
+            
+            document.getElementById('headerUserName').textContent = currentUser.fullName;
+            document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Quản trị viên' : 'Học sinh';
+            
+            const btnManage = document.getElementById('btnManageUsers');
+            if(currentUser.role === 'admin') {
+                btnManage.classList.remove('hidden');
+                btnManage.classList.add('inline-flex');
+                renderUsers();
+            } else {
+                btnManage.classList.add('hidden');
+                btnManage.classList.remove('inline-flex');
+            }
+            renderDocs();
+        }
+
+        // Document Logic
+        function handleAddDoc(e) {
+            e.preventDefault();
+            const title = document.getElementById('docTitle').value.trim();
+            const link = document.getElementById('docLink').value.trim();
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            let docs = JSON.parse(localStorage.getItem(DOCS_KEY)) || [];
+            docs.unshift({ 
+                id: Date.now().toString(), 
+                title: title, 
+                link: link, 
+                author: currentUser.fullName, 
+                date: dateStr 
+            });
+            localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+            
+            closeModal('uploadModal');
+            document.getElementById('docTitle').value = '';
+            document.getElementById('docLink').value = '';
+            renderDocs();
+            showToast('Đăng tài liệu thành công!');
+        }
+
+        function deleteDoc(id) {
+            askConfirm('Xóa tài liệu', 'Tài liệu này sẽ bị xóa vĩnh viễn khỏi hệ thống.', () => {
+                let docs = JSON.parse(localStorage.getItem(DOCS_KEY)) || [];
+                docs = docs.filter(d => d.id !== id);
+                localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
+                renderDocs();
+                showToast('Đã xóa tài liệu');
+            });
+        }
+
+        function renderDocs() {
+            const grid = document.getElementById('resourceGrid');
+            const emptyState = document.getElementById('emptyState');
+            let docs = JSON.parse(localStorage.getItem(DOCS_KEY)) || [];
+            
+            if (docs.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = docs.map((doc, index) => {
+                const canDelete = currentUser && (currentUser.fullName === doc.author || currentUser.role === 'admin');
+                const gradients = [
+                    'from-blue-500 to-cyan-500', 'from-purple-500 to-indigo-500', 
+                    'from-emerald-500 to-teal-500', 'from-amber-500 to-orange-500'
+                ];
+                const bg = gradients[index % gradients.length];
+
+                return `
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
+                    <div class="h-20 bg-gradient-to-r ${bg} p-5 flex justify-between items-start relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl pointer-events-none"></div>
+                        <span class="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/20">
+                            Tài Liệu
+                        </span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col justify-between -mt-6 relative">
+                        <div class="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-blue-500 text-xl mb-3 border border-slate-50">
+                            <i class="fa-regular fa-file-lines"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg leading-snug mb-2 group-hover:text-blue-600 transition-colors">${doc.title}</h3>
+                            <div class="space-y-1.5 mb-4">
+                                <p class="text-xs text-slate-500 font-medium flex items-center"><i class="fa-solid fa-user-pen w-4 text-slate-400"></i> ${doc.author}</p>
+                                <p class="text-xs text-slate-500 font-medium flex items-center"><i class="fa-regular fa-calendar w-4 text-slate-400"></i> ${doc.date}</p>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 flex justify-between items-center mt-auto">
+                            <a href="${doc.link}" target="_blank" class="flex-1 text-center py-2 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl font-bold text-sm transition-colors duration-300">
+                                Xem / Tải về
+                            </a>
+                            ${canDelete ? `
+                            <button onclick="deleteDoc('${doc.id}')" class="ml-2 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // User Management Logic
+        function handleAddUser(e) {
+            e.preventDefault();
+            const fn = document.getElementById('newFullname').value.trim();
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+
+            let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            if(users.find(user => user.username === u)) {
+                showToast('Tên đăng nhập đã tồn tại!', 'error');
+                return;
+            }
+
+            users.push({ username: u, password: p, fullName: fn, role: 'student' });
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            
+            document.getElementById('newFullname').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            renderUsers();
+            showToast(`Đã thêm học sinh: ${fn}`);
+        }
+
+        function deleteUser(username) {
+            if(username === 'admin') {
+                showToast('Không thể xóa Quản trị viên gốc!', 'error');
+                return;
+            }
+            askConfirm('Xóa tài khoản', `Bạn có chắc chắn muốn xóa tài khoản "${username}"?`, () => {
+                let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+                users = users.filter(u => u.username !== username);
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                renderUsers();
+                showToast('Đã xóa tài khoản');
+            });
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('userListTable');
+            let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            
+            tbody.innerHTML = users.map(u => `
+                <tr class="hover:bg-slate-50 transition-colors group">
+                    <td class="p-4">
+                        <div class="font-bold text-slate-800">${u.fullName}</div>
+                        ${u.role === 'admin' ? '<span class="inline-block mt-1 text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase">Admin</span>' : ''}
+                    </td>
+                    <td class="p-4 font-mono text-sm text-slate-600 font-medium">${u.username}</td>
+                    <td class="p-4 font-mono text-sm text-slate-600 font-medium hidden sm:table-cell blur-sm hover:blur-none transition-all cursor-pointer select-none" title="Trỏ chuột để xem">${u.password}</td>
+                    <td class="p-4 text-center">
+                        ${u.role !== 'admin' 
+                            ? `<button onclick="deleteUser('${u.username}')" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-rose-100 hover:text-rose-600 transition inline-flex items-center justify-center">
+                                <i class="fa-solid fa-trash"></i>
+                               </button>` 
+                            : '<span class="text-slate-300 inline-flex items-center justify-center w-8 h-8"><i class="fa-solid fa-lock"></i></span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Boot
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
