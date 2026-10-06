@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- FIREBASE SDKs -->
+    <!-- FIREBASE SDKs COMPAT (Chạy trực tiếp trên file HTML) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
@@ -20,30 +20,30 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
     </style>
 </head>
 <body class="h-full font-sans text-slate-800 antialiased bg-slate-50 relative overflow-x-hidden">
 
-    <!-- Background Decoration -->
+    <!-- Background Deco -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 blur-[100px]"></div>
         <div class="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-purple-400/20 blur-[120px]"></div>
     </div>
 
     <!-- MÀN HÌNH ĐĂNG NHẬP -->
-    <div id="loginView" class="relative z-10 min-h-screen flex items-center justify-center p-4 transition-opacity duration-500">
+    <div id="loginView" class="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div class="glass-panel p-8 sm:p-10 rounded-3xl shadow-2xl shadow-blue-900/10 w-full max-w-md relative overflow-hidden">
             <div class="text-center mb-8 relative z-10">
-                <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg">
+                <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-blue-500/30">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <h1 class="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Tài Liệu 10A1</h1>
-                <p class="text-sm text-slate-500 mt-2 font-medium">Hệ thống Đám Mây - Realtime</p>
+                <p class="text-sm text-slate-500 mt-2 font-medium">Hệ thống đồng bộ thời gian thực</p>
             </div>
             
             <form id="loginForm" onsubmit="handleLogin(event)" class="relative z-10 space-y-5">
@@ -55,7 +55,7 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mật khẩu</label>
                     <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-3 bg-white/80 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
                 </div>
-                <button type="submit" id="btnLogin" class="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-0.5">
+                <button type="submit" id="btnLogin" class="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-500/25 transition-transform transform hover:-translate-y-0.5">
                     Đăng Nhập
                 </button>
             </form>
@@ -67,19 +67,21 @@
         <header class="glass-panel sticky top-0 z-40 border-b border-slate-200/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 sm:h-20">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white"><i class="fa-solid fa-cloud"></i></div>
-                    <span class="text-lg font-extrabold text-slate-800">Kho Tài Liệu Cloud</span>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                        <i class="fa-solid fa-cloud"></i>
+                    </div>
+                    <span class="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Kho Tài Liệu 10A1</span>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <div class="text-right mr-2 hidden sm:block">
                         <div id="headerUserName" class="text-sm font-bold text-slate-800">Name</div>
                         <div id="headerUserRole" class="text-[10px] font-semibold text-slate-500 uppercase">Role</div>
                     </div>
-                    <button id="btnManageUsers" onclick="openModal('manageModal')" class="hidden px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border text-sm font-bold">
-                        <i class="fa-solid fa-users-gear"></i> Quản lý
+                    <button id="btnManageUsers" onclick="openModal('manageModal')" class="hidden px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition text-xs sm:text-sm font-bold">
+                        <i class="fa-solid fa-users-gear"></i> <span class="hidden md:inline">Quản lý lớp</span>
                     </button>
-                    <button onclick="handleLogout()" class="px-4 py-2 rounded-xl bg-white border text-slate-600 hover:text-rose-600 hover:bg-rose-50 text-sm font-bold shadow-sm">
-                        Đăng xuất
+                    <button onclick="handleLogout()" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 text-sm font-bold shadow-sm transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i>Thoát
                     </button>
                 </div>
             </div>
@@ -87,29 +89,44 @@
 
         <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-20 mt-8">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-layer-group text-blue-500 mr-2"></i> Tài liệu của lớp</h3>
-                <button onclick="openModal('uploadModal')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg hover:-translate-y-0.5 transition-transform">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-500"></i> Tài liệu mới cập nhật
+                </h3>
+                <button onclick="openModal('uploadModal')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 transition-transform">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Đăng tài liệu
                 </button>
             </div>
             
             <div id="resourceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            <div id="emptyState" class="hidden text-center py-20"><p>Chưa có tài liệu nào.</p></div>
+            
+            <div id="emptyState" class="hidden text-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-folder-open"></i></div>
+                <p class="text-slate-500 font-medium">Chưa có tài liệu nào trên hệ thống đám mây.</p>
+            </div>
         </main>
     </div>
 
     <!-- MODAL ĐĂNG TÀI LIỆU -->
-    <div id="uploadModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity">
-        <div class="absolute inset-0 bg-slate-900/60" onclick="closeModal('uploadModal')"></div>
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('uploadModal')"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
             <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto p-6" id="uploadModalContent">
-                <h3 class="text-lg font-bold mb-4">Thêm tài liệu mới</h3>
+                <div class="flex justify-between items-center mb-5 pb-3 border-b">
+                    <h3 class="text-lg font-bold text-slate-800">Thêm tài liệu mới</h3>
+                    <button onclick="closeModal('uploadModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
                 <form onsubmit="handleAddDoc(event)" class="space-y-4">
-                    <input type="text" id="docTitle" required placeholder="Tên tài liệu" class="w-full px-4 py-3 bg-slate-50 border rounded-xl">
-                    <input type="url" id="docLink" required placeholder="Link Drive/Mega..." class="w-full px-4 py-3 bg-slate-50 border rounded-xl">
-                    <div class="flex justify-end gap-3 mt-4">
-                        <button type="button" onclick="closeModal('uploadModal')" class="px-5 py-2.5 bg-slate-100 rounded-xl font-bold">Hủy</button>
-                        <button type="submit" id="btnSubmitDoc" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold">Đăng lên Cloud</button>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tên tài liệu / Tiêu đề</label>
+                        <input type="text" id="docTitle" required placeholder="VD: Đề cương Toán giữa kì 1" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Đường link (Drive, Mega...)</label>
+                        <input type="url" id="docLink" required placeholder="https://..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end gap-3 pt-3">
+                        <button type="button" onclick="closeModal('uploadModal')" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold">Hủy</button>
+                        <button type="submit" id="btnSubmitDoc" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/25">Đăng bài</button>
                     </div>
                 </form>
             </div>
@@ -117,23 +134,30 @@
     </div>
 
     <!-- MODAL QUẢN LÝ -->
-    <div id="manageModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity">
-        <div class="absolute inset-0 bg-slate-900/60" onclick="closeModal('manageModal')"></div>
+    <div id="manageModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('manageModal')"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
             <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl p-6 pointer-events-auto max-h-[90vh] overflow-y-auto" id="manageModalContent">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-purple-700">Quản lý Tài Khoản</h3>
-                    <button onclick="closeModal('manageModal')" class="text-2xl">&times;</button>
+                <div class="flex justify-between items-center mb-6 pb-2 border-b">
+                    <h3 class="text-lg font-bold text-purple-700 flex items-center gap-2"><i class="fa-solid fa-users-gear"></i> Quản lý Tài Khoản Lớp</h3>
+                    <button onclick="closeModal('manageModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-                <form onsubmit="handleAddUser(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-8 bg-purple-50 p-4 rounded-xl">
-                    <input type="text" id="newFullname" required placeholder="Họ tên thật" class="px-4 py-2 border rounded-xl">
-                    <input type="text" id="newUsername" required placeholder="Tên đăng nhập" class="px-4 py-2 border rounded-xl">
-                    <input type="text" id="newPassword" required placeholder="Mật khẩu" class="px-4 py-2 border rounded-xl">
-                    <button type="submit" id="btnSubmitUser" class="bg-purple-600 text-white font-bold rounded-xl">Thêm User</button>
+                <form onsubmit="handleAddUser(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-8 bg-purple-50/60 p-4 rounded-2xl border border-purple-100">
+                    <input type="text" id="newFullname" required placeholder="Họ tên thật" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+                    <input type="text" id="newUsername" required placeholder="Tên đăng nhập" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+                    <input type="text" id="newPassword" required placeholder="Mật khẩu" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+                    <button type="submit" id="btnSubmitUser" class="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md shadow-purple-500/25">Thêm User</button>
                 </form>
-                <div class="border rounded-xl overflow-hidden">
+                <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-100 border-b"><tr><th class="p-3">Họ Tên</th><th class="p-3">Username</th><th class="p-3">Password</th><th class="p-3 text-center">Xóa</th></tr></thead>
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-3.5 text-xs font-bold text-slate-500 uppercase">Họ Tên</th>
+                                <th class="p-3.5 text-xs font-bold text-slate-500 uppercase">Username</th>
+                                <th class="p-3.5 text-xs font-bold text-slate-500 uppercase">Password</th>
+                                <th class="p-3.5 text-xs font-bold text-slate-500 uppercase text-center">Xóa</th>
+                            </tr>
+                        </thead>
                         <tbody id="userListTable" class="divide-y text-sm"></tbody>
                     </table>
                 </div>
@@ -141,52 +165,55 @@
         </div>
     </div>
 
-    <!-- TOAST -->
-    <div id="toast" class="fixed bottom-5 right-5 z-[60] transform translate-y-20 opacity-0 transition-all flex items-center gap-3 px-5 py-3.5 bg-slate-800 text-white rounded-2xl shadow-2xl">
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-[60] transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 px-5 py-3.5 bg-slate-800 text-white rounded-2xl shadow-2xl">
+        <i id="toastIcon" class="fa-solid fa-check-circle text-emerald-400 text-lg"></i>
         <span id="toastMsg" class="font-medium text-sm">Thành công!</span>
     </div>
 
+    <!-- JAVASCRIPT LOGIC WITH YOUR FIREBASE CONFIG -->
     <script>
-        // ====================================================================
-        // ⬇️ DÁN FIREBASE CONFIG CỦA BẠN VÀO BÊN TRONG DẤU NGOẶC NHỌN NÀY ⬇️
-        // ====================================================================
+        // CẤU HÌNH FIREBASE CHÍNH XÁC TỪ ẢNH CỦA BẠN
         const firebaseConfig = {
             apiKey: "AIzaSyDC4sPZd6dIhVlYxXyLVT0QXjRnacNZWWc",
             authDomain: "tailieu10a1-daafd.firebaseapp.com",
+            databaseURL: "https://tailieu10a1-daafd-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "tailieu10a1-daafd",
             storageBucket: "tailieu10a1-daafd.firebasestorage.app",
             messagingSenderId: "996998352210",
-            appId: "1:996998352210:web:cb780b5af32a3fca93be8b",
+            appId: "1:996998352210:web:d006e92423ba9e6393be8b",
+            measurementId: "G-3RWHZXE3BQ"
         };
-        // ====================================================================
 
-        // Khởi tạo Firebase
+        // Khởi tạo
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let currentUser = null;
 
-        // Custom UI
-        function showToast(msg) {
+        function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
+
         function openModal(id) { document.getElementById(id).classList.remove('hidden', 'opacity-0'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden', 'opacity-0'); }
 
-        // Tự tạo Admin nếu DB trống
+        // Tự tạo admin gốc nếu chưa có
         async function initAdmin() {
-            const adminDoc = await db.collection('users').doc('admin').get();
-            if (!adminDoc.exists) {
-                await db.collection('users').doc('admin').set({
-                    username: 'admin', password: '123456', fullName: 'Ban Cán Sự', role: 'admin'
-                });
-            }
+            try {
+                const adminDoc = await db.collection('users').doc('admin').get();
+                if (!adminDoc.exists) {
+                    await db.collection('users').doc('admin').set({
+                        username: 'admin', password: '123456', fullName: 'Ban Cán Sự', role: 'admin'
+                    });
+                }
+            } catch(e) { console.log(e); }
         }
         initAdmin();
 
-        // Kiểm tra phiên đăng nhập
+        // Session local
         if(sessionStorage.getItem('cloud_session')) {
             currentUser = JSON.parse(sessionStorage.getItem('cloud_session'));
             setupMainView();
@@ -204,16 +231,16 @@
                 const snapshot = await db.collection('users').where('username', '==', u).where('password', '==', p).get();
                 if (!snapshot.empty) {
                     currentUser = snapshot.docs[0].data();
-                    currentUser.id = snapshot.docs[0].id; // Lưu id document
+                    currentUser.id = snapshot.docs[0].id;
                     sessionStorage.setItem('cloud_session', JSON.stringify(currentUser));
                     setupMainView();
                     document.getElementById('loginForm').reset();
                     showToast(`Chào mừng ${currentUser.fullName}!`);
                 } else {
-                    alert('Sai tên đăng nhập hoặc mật khẩu!');
+                    showToast('Sai tài khoản hoặc mật khẩu!', 'error');
                 }
             } catch (error) {
-                alert('Lỗi kết nối Server! Vui lòng kiểm tra lại cấu hình Firebase.');
+                alert('Lỗi kết nối Firebase! Hãy chắc chắn bạn đã tạo Firestore Database ở chế độ test mode.');
             }
             btn.textContent = 'Đăng Nhập';
         }
@@ -223,24 +250,25 @@
             sessionStorage.removeItem('cloud_session');
             document.getElementById('mainView').classList.add('hidden');
             document.getElementById('loginView').classList.remove('hidden');
+            showToast('Đã đăng xuất');
         }
 
         function setupMainView() {
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('mainView').classList.remove('hidden');
             document.getElementById('headerUserName').textContent = currentUser.fullName;
-            document.getElementById('headerUserRole').textContent = currentUser.role;
+            document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Quản trị viên' : 'Học sinh';
             
             if(currentUser.role === 'admin') {
                 document.getElementById('btnManageUsers').classList.remove('hidden');
-                listenUsers(); // Lắng nghe danh sách users realtime
+                listenUsers();
             } else {
                 document.getElementById('btnManageUsers').classList.add('hidden');
             }
-            listenDocs(); // Lắng nghe tài liệu realtime
+            listenDocs();
         }
 
-        // ĐĂNG TÀI LIỆU (LƯU LÊN FIRESTORE)
+        // ĐĂNG TÀI LIỆU (REALTIME)
         async function handleAddDoc(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitDoc');
@@ -259,19 +287,19 @@
             });
             
             closeModal('uploadModal');
-            document.getElementById('docTitle').value = ''; document.getElementById('docLink').value = '';
-            btn.textContent = 'Đăng lên Cloud';
-            showToast('Đã đăng tài liệu!');
+            document.getElementById('docTitle').value = ''; 
+            document.getElementById('docLink').value = '';
+            btn.textContent = 'Đăng bài';
+            showToast('Đã đăng tài liệu thành công!');
         }
 
         async function deleteDoc(docId) {
-            if(confirm('Xóa tài liệu này vĩnh viễn?')) {
+            if(confirm('Xóa tài liệu này vĩnh viễn khỏi hệ thống?')) {
                 await db.collection('docs').doc(docId).delete();
-                showToast('Đã xóa!');
+                showToast('Đã xóa tài liệu');
             }
         }
 
-        // LẮNG NGHE TÀI LIỆU REALTIME
         function listenDocs() {
             db.collection('docs').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const grid = document.getElementById('resourceGrid');
@@ -282,27 +310,41 @@
                 }
                 document.getElementById('emptyState').classList.add('hidden');
                 
-                grid.innerHTML = snapshot.docs.map(doc => {
+                const gradients = ['from-blue-500 to-cyan-500', 'from-purple-500 to-indigo-500', 'from-emerald-500 to-teal-500'];
+                
+                grid.innerHTML = snapshot.docs.map((doc, idx) => {
                     const data = doc.data();
                     const canDelete = currentUser.role === 'admin' || currentUser.username === data.authorUsername;
+                    const bg = gradients[idx % gradients.length];
+
                     return `
-                    <div class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col justify-between">
-                        <div>
-                            <div class="text-3xl text-blue-500 mb-3"><i class="fa-solid fa-file-pdf"></i></div>
-                            <h3 class="font-bold text-lg mb-2">${data.title}</h3>
-                            <p class="text-xs text-slate-500 mb-1"><i class="fa-solid fa-user mr-1"></i> ${data.author}</p>
-                            <p class="text-xs text-slate-500"><i class="fa-solid fa-clock mr-1"></i> ${data.dateStr}</p>
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
+                        <div class="h-16 bg-gradient-to-r ${bg} p-4 flex justify-between items-center text-white">
+                            <span class="text-xs font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">Tài Liệu Cloud</span>
+                            <i class="fa-solid fa-cloud text-lg opacity-80"></i>
                         </div>
-                        <div class="mt-4 flex gap-2">
-                            <a href="${data.link}" target="_blank" class="flex-1 text-center py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">Xem file</a>
-                            ${canDelete ? `<button onclick="deleteDoc('${doc.id}')" class="px-3 bg-red-50 text-red-500 rounded-xl"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        <div class="p-5 flex-grow flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg mb-2 leading-snug">${data.title}</h3>
+                                <p class="text-xs text-slate-500 mb-1"><i class="fa-solid fa-user-pen w-4"></i> ${data.author}</p>
+                                <p class="text-xs text-slate-500 mb-4"><i class="fa-regular fa-calendar w-4"></i> ${data.dateStr || 'Gần đây'}</p>
+                            </div>
+                            <div class="pt-3 border-t flex justify-between items-center">
+                                <a href="${data.link}" target="_blank" class="flex-1 text-center py-2 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 rounded-xl font-bold text-sm transition">
+                                    Xem / Tải về
+                                </a>
+                                ${canDelete ? `
+                                <button onclick="deleteDoc('${doc.id}')" class="ml-2 w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>` : ''}
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
             });
         }
 
-        // QUẢN LÝ USER REALTIME
+        // QUẢN LÝ USER (REALTIME)
         async function handleAddUser(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitUser');
@@ -314,39 +356,5 @@
 
             const check = await db.collection('users').where('username', '==', u).get();
             if(!check.empty) {
-                alert('Tên đăng nhập đã tồn tại!');
+                showToast('Tên đăng nhập đã tồn tại!', 'error');
             } else {
-                await db.collection('users').add({ username: u, password: p, fullName: fn, role: 'student' });
-                document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('newFullname').value = '';
-                showToast('Đã cấp tài khoản thành công!');
-            }
-            btn.textContent = 'Thêm User';
-        }
-
-        async function deleteUser(docId) {
-            if(confirm('Xóa tài khoản này?')) {
-                await db.collection('users').doc(docId).delete();
-                showToast('Đã xóa tài khoản');
-            }
-        }
-
-        function listenUsers() {
-            db.collection('users').onSnapshot(snapshot => {
-                const tbody = document.getElementById('userListTable');
-                tbody.innerHTML = snapshot.docs.map(doc => {
-                    const u = doc.data();
-                    return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold">${u.fullName} ${u.role==='admin' ? '<span class="text-[10px] bg-red-100 text-red-600 px-2 rounded-full">Admin</span>' : ''}</td>
-                        <td class="p-3">${u.username}</td>
-                        <td class="p-3">${u.password}</td>
-                        <td class="p-3 text-center">
-                            ${u.role !== 'admin' ? `<button onclick="deleteUser('${doc.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        </td>
-                    </tr>`;
-                }).join('');
-            });
-        }
-    </script>
-</body>
-</html>
