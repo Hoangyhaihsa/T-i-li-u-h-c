@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- FIREBASE SDKs COMPAT (Chạy trực tiếp trên file HTML) -->
+    <!-- FIREBASE SDKs COMPAT -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
@@ -20,7 +20,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
@@ -171,9 +171,8 @@
         <span id="toastMsg" class="font-medium text-sm">Thành công!</span>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH YOUR FIREBASE CONFIG -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // CẤU HÌNH FIREBASE CHÍNH XÁC TỪ ẢNH CỦA BẠN
         const firebaseConfig = {
             apiKey: "AIzaSyDC4sPZd6dIhVlYxXyLVT0QXjRnacNZWWc",
             authDomain: "tailieu10a1-daafd.firebaseapp.com",
@@ -185,7 +184,6 @@
             measurementId: "G-3RWHZXE3BQ"
         };
 
-        // Khởi tạo
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let currentUser = null;
@@ -200,20 +198,25 @@
         function openModal(id) { document.getElementById(id).classList.remove('hidden', 'opacity-0'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden', 'opacity-0'); }
 
-        // Tự tạo admin gốc nếu chưa có
+        // TỰ ĐỘNG KHỞI TẠO TÀI KHOẢN ADMIN TRÊN ĐÁM MÂY
         async function initAdmin() {
             try {
-                const adminDoc = await db.collection('users').doc('admin').get();
-                if (!adminDoc.exists) {
-                    await db.collection('users').doc('admin').set({
-                        username: 'admin', password: '123456', fullName: 'Ban Cán Sự', role: 'admin'
+                const snapshot = await db.collection('users').where('username', '==', 'admin').get();
+                if (snapshot.empty) {
+                    await db.collection('users').add({
+                        username: 'admin', 
+                        password: '123456', 
+                        fullName: 'Ban Cán Sự (Admin)', 
+                        role: 'admin'
                     });
                 }
-            } catch(e) { console.log(e); }
+            } catch(e) { 
+                console.error("Chưa cấp quyền Rules Firestore:", e); 
+            }
         }
         initAdmin();
 
-        // Session local
+        // SESSION CHECK
         if(sessionStorage.getItem('cloud_session')) {
             currentUser = JSON.parse(sessionStorage.getItem('cloud_session'));
             setupMainView();
@@ -224,25 +227,38 @@
             e.preventDefault();
             const btn = document.getElementById('btnLogin');
             btn.textContent = 'Đang kiểm tra...';
+            btn.disabled = true;
+
             const u = document.getElementById('loginUsername').value.trim();
             const p = document.getElementById('loginPassword').value.trim();
             
             try {
-                const snapshot = await db.collection('users').where('username', '==', u).where('password', '==', p).get();
+                // Kiểm tra trực tiếp trên DB
+                let snapshot = await db.collection('users').where('username', '==', u).where('password', '==', p).get();
+                
+                // Trường hợp đăng nhập admin lần đầu mà DB chưa kịp tạo
+                if (snapshot.empty && u === 'admin' && p === '123456') {
+                    await db.collection('users').add({
+                        username: 'admin', password: '123456', fullName: 'Ban Cán Sự (Admin)', role: 'admin'
+                    });
+                    snapshot = await db.collection('users').where('username', '==', 'admin').get();
+                }
+
                 if (!snapshot.empty) {
                     currentUser = snapshot.docs[0].data();
                     currentUser.id = snapshot.docs[0].id;
                     sessionStorage.setItem('cloud_session', JSON.stringify(currentUser));
                     setupMainView();
                     document.getElementById('loginForm').reset();
-                    showToast(`Chào mừng ${currentUser.fullName}!`);
+                    showToast(`Xin chào ${currentUser.fullName}!`);
                 } else {
-                    showToast('Sai tài khoản hoặc mật khẩu!', 'error');
+                    alert('Sai tên đăng nhập hoặc mật khẩu!');
                 }
             } catch (error) {
-                alert('Lỗi kết nối Firebase! Hãy chắc chắn bạn đã tạo Firestore Database ở chế độ test mode.');
+                alert('Lỗi kết nối! Vui lòng vào Firebase Console -> Firestore Database -> Rules và sửa lại allow read, write: if true;');
             }
             btn.textContent = 'Đăng Nhập';
+            btn.disabled = false;
         }
 
         function handleLogout() {
@@ -268,7 +284,7 @@
             listenDocs();
         }
 
-        // ĐĂNG TÀI LIỆU (REALTIME)
+        // ĐĂNG TÀI LIỆU
         async function handleAddDoc(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitDoc');
@@ -344,7 +360,7 @@
             });
         }
 
-        // QUẢN LÝ USER (REALTIME)
+        // QUẢN LÝ USER
         async function handleAddUser(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitUser');
@@ -358,3 +374,41 @@
             if(!check.empty) {
                 showToast('Tên đăng nhập đã tồn tại!', 'error');
             } else {
+                await db.collection('users').add({ username: u, password: p, fullName: fn, role: 'student' });
+                document.getElementById('newUsername').value = ''; 
+                document.getElementById('newPassword').value = ''; 
+                document.getElementById('newFullname').value = '';
+                showToast(`Đã thêm học sinh: ${fn}`);
+            }
+            btn.textContent = 'Thêm User';
+        }
+
+        async function deleteUser(docId) {
+            if(confirm('Xóa tài khoản này khỏi hệ thống?')) {
+                await db.collection('users').doc(docId).delete();
+                showToast('Đã xóa tài khoản');
+            }
+        }
+
+        function listenUsers() {
+            db.collection('users').onSnapshot(snapshot => {
+                const tbody = document.getElementById('userListTable');
+                tbody.innerHTML = snapshot.docs.map(doc => {
+                    const u = doc.data();
+                    return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3.5 font-bold text-slate-800">
+                            ${u.fullName} ${u.role === 'admin' ? '<span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold ml-1">Admin</span>' : ''}
+                        </td>
+                        <td class="p-3.5 font-mono text-slate-600">${u.username}</td>
+                        <td class="p-3.5 font-mono text-slate-600">${u.password}</td>
+                        <td class="p-3.5 text-center">
+                            ${u.role !== 'admin' ? `<button onclick="deleteUser('${doc.id}')" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>` : '<i class="fa-solid fa-lock text-slate-300"></i>'}
+                        </td>
+                    </tr>`;
+                }).join('');
+            });
+        }
+    </script>
+</body>
+</html>
